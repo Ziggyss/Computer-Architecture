@@ -2,12 +2,20 @@
 
 import sys
 
+LDI = 0b10000010
+PRN = 0b01000111
+HLT = 0b00000001
+
+
+
 class CPU:
     """Main CPU class."""
 
     def __init__(self):
         """Construct a new CPU."""
-        pass
+        self.memory = [0] * 255 # or should it be 256? It says can only compute values up to 255?
+        self.register = [0] * 8
+        self.pc = 0
 
     def load(self):
         """Load a program into memory."""
