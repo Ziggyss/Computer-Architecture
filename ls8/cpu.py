@@ -17,22 +17,24 @@ class CPU:
         self.register = [0] * 8
         self.pc = 0
 
-    def load(self):
+    def load(self, program):
         """Load a program into memory."""
 
         address = 0
 
         # For now, we've just hardcoded a program:
 
-        program = [
-            # From print8.ls8
-            0b10000010, # LDI R0,8
-            0b00000000,
-            0b00001000,
-            0b01000111, # PRN R0
-            0b00000000,
-            0b00000001, # HLT
-        ]
+        # program = [
+        #     # From print8.ls8
+        #     0b10000010, # LDI R0,8
+        #     0b00000000,
+        #     0b00001000,
+        #     0b01000111, # PRN R0
+        #     0b00000000,
+        #     0b00000001, # HLT
+        # ]
+
+        # program = sys.argv[1]
 
         for instruction in program:
             self.ram[address] = instruction
@@ -69,8 +71,33 @@ class CPU:
         print()
 
     def run(self):
+        running = True
+        inc_size = 0
+
+        while running:
+            cmd = memory[pc]
+            if cmd == HLT:
+                running = False
+
+            elif cmd == LDI:
+                # read the values at the next two positions
+                operand_a = self.ram_read(self.pc + 1)
+                operand_b = self.ram_read(self.pc + 2)
+                self.register[operand_a] = operand_b
+                # bypass the three positions that have just been used to move to the next
+                inc_size = 3
+
+            elif cmd == PRN:
+                register_index = self.ram_read(self.pc + 1)
+                value = self.register[register_index]
+                print(value)
+                inc_size = 2
+                   
+        pc += inc_size        
+
+
         """Run the CPU."""
-        pass
+       
 
     def ram_read(self, MAR):
         # return the value at the memory address 
@@ -82,3 +109,5 @@ class CPU:
     def ram_write(self, MDR, MAR):
         # assign the value to the memory address location
         self.memory[MAR] = MDR
+
+       
