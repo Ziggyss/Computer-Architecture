@@ -114,14 +114,14 @@ class CPU:
 
             if cmd == LDI:
                 # read the values at the next two positions
-                operand_a = int(self.ram[self.pc + 1], 2)
-                operand_b = int(self.ram[self.pc + 1], 2)
+                operand_a = self.ram[self.pc + 1]
+                operand_b = self.ram[self.pc + 1]
                 self.register[operand_a] = operand_b
                 # bypass the three positions that have just been used to move to the next
                 self.pc += 3
 
             elif cmd == PRN:
-                register_index = int(self.ram[self.pc + 1], 2)
+                register_index = self.ram[self.pc + 1]
                 value = self.register[register_index]
                 print(value)
                 self.pc += 2
