@@ -13,9 +13,21 @@ class CPU:
 
     def __init__(self):
         """Construct a new CPU."""
-        self.memory = [0] * 255 # or should it be 256? It says can only compute values up to 255?
+        self.ram = [0] * 256 
         self.register = [0] * 8
         self.pc = 0
+
+    def ram_read(self, MAR):
+            # return the value at the memory address 
+            return self.ram[MAR]
+
+    # MAR is the Memory Address Register (the address)
+    # MDR is the Memory Data Register (the value)   
+
+    def ram_write(self, MDR, MAR):
+        # assign the value to the memory address location
+        self.ram[MAR] = MDR
+
 
     def load(self, program):
         """Load a program into memory."""
@@ -72,42 +84,37 @@ class CPU:
 
     def run(self):
         running = True
-        inc_size = 0
 
         while running:
-            cmd = memory[pc]
-            if cmd == HLT:
-                running = False
+            cmd = self.ram[self.pc]
 
-            elif cmd == LDI:
+            if cmd == LDI:
                 # read the values at the next two positions
                 operand_a = self.ram_read(self.pc + 1)
                 operand_b = self.ram_read(self.pc + 2)
                 self.register[operand_a] = operand_b
                 # bypass the three positions that have just been used to move to the next
-                inc_size = 3
+                self.pc += 3
 
             elif cmd == PRN:
                 register_index = self.ram_read(self.pc + 1)
                 value = self.register[register_index]
                 print(value)
-                inc_size = 2
-                   
-        pc += inc_size        
+                self.pc += 2
+
+              
+            elif cmd == HLT:
+                running = False    
+                         
 
 
         """Run the CPU."""
        
 
-    def ram_read(self, MAR):
-        # return the value at the memory address 
-        return self.memory[MAR]
+   
+# cpu = CPU()
+# cpu.load(program)
 
-    # MAR is the Memory Address Register (the address)
-    # MDR is the Memory Data Register (the value)   
-
-    def ram_write(self, MDR, MAR):
-        # assign the value to the memory address location
-        self.memory[MAR] = MDR
+# cpu.run()
 
        
