@@ -164,10 +164,7 @@ class CPU:
 
     def run(self):
         running = True
-        IR = self.ram[self.pc]
-        operand_a = self.ram[self.pc + 1]
-        operand_b = self.ram[self.pc + 2]
-
+      
         while running:
             IR = self.ram[self.pc]
             operand_a = self.ram[self.pc + 1]
