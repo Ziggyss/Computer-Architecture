@@ -20,14 +20,14 @@ class CPU:
 
     def ram_read(self, MAR):
             # return the value at the memory address 
-            return self.ram[int(MAR, 2)]
+            return self.ram[MAR]
 
     # MAR is the Memory Address Register (the address)
     # MDR is the Memory Data Register (the value)   
 
     def ram_write(self, MDR, MAR):
         # assign the value to the memory address location
-       self.ram[int(MAR), 2] = MDR
+        self.ram[MAR] = MDR
 
 
     def load(self, program):
@@ -49,34 +49,37 @@ class CPU:
 
         # program = sys.argv[1]
 
-        for instruction in program:
-            self.ram[address] = instruction
-            address += 1
+        # for instruction in program:
+        #     self.ram[address] = instruction
+        #     address += 1
 
-        # if len(sys.argv) != 2:
-        #     print("usage: ls8.py filename")
-        #     sys.exit(1)
-        # try:
-        #     with open(sys.argv[1]) as f:
-        #         for line in f:
-        #             # split line before and after comment symbol
-        #             comment_split = line.split("#")
+        if len(sys.argv) != 2:
+            print("usage: ls8.py filename")
+            sys.exit(1)
+        try:
+            with open(sys.argv[1]) as f:
+                for line in f:
+                    # split line before and after comment symbol
+                    comment_split = line.split("#")
 
-        #             # extract our number
-        #             num = comment_split[0].strip() # trim whitespace
+                    # extract our number
+                    num = comment_split[0].strip() # trim whitespace
 
-        #             if num == '':
-        #                 continue # ignore blank lines
+                    if num == '':
+                        continue # ignore blank lines
 
-        #             # convert our binary string to a number
-        #             x = int(num, 2)
+                    # convert our binary string to a number
+                    x = int(num, 2)
 
-        #             # print the x in bin and dec
-        #             print(f"{x:08b}: {x:d}")
+                    # print the x in bin and dec
+                    # print(f"{x:08b}: {x:d}")
 
-        # except FileNotFoundError:
-        #     print(f"{sys.argv[0]}: {sys.argv[1]} not found")
-        #     sys.exit(2)    
+                    self.ram_write(x, address)
+                    address += 1
+
+        except FileNotFoundError:
+            print(f"{sys.argv[0]}: {sys.argv[1]} not found")
+            sys.exit(2)    
 
 
     def alu(self, op, reg_a, reg_b):
