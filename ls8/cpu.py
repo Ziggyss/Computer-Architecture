@@ -6,6 +6,8 @@ LDI = 0b10000010
 PRN = 0b01000111
 HLT = 0b00000001
 MUL = 0b10100010
+PUSH = 0b01000101
+POP = 0b01000110
 
 
 
@@ -17,6 +19,16 @@ class CPU:
         self.ram = [0] * 256 
         self.register = [0] * 8
         self.pc = 0
+        self.sp = 0xF4
+        self.inc_size = 0
+        self.branchtable = {}
+        self.branchtable[LDI] = self.handle_ldi
+        self.branchtable[PRN] = self.handle_prn
+        self.branchtable[MUL] = self.handle_mul
+        self.branchtable[HLT] = self.handle_hlt
+        self.branchtable[PUSH] = self.handle_push
+        self.branchtable[POP] = self.handle_pop
+        
 
     def ram_read(self, MAR):
             # return the value at the memory address 
@@ -29,6 +41,44 @@ class CPU:
         # assign the value to the memory address location
         self.ram[MAR] = MDR
 
+    def handle_ldi(self, operand_a, operand_b):
+        self.register[operand_a] = operand_b
+        self.inc_size = 3   
+
+    def handle_prn(self, operand_a, operand_b):
+        value = self.register[operand_a]
+        print(value)
+        self.inc_size = 2
+
+    def handle_mul(self, operand_a, operand_b):
+        self.alu("MUL", operand_a, operand_b)
+        self.inc_size = 3
+
+    def handle_hlt(self, operand_a, operand_b):
+        sys.exit()  
+
+
+    def handle_push(self, operand_a, operand_b):
+        
+        #Decrement the sp
+        self.sp -= 1
+
+        # Push the value in the register to the address pointed to by sp
+        self.ram[self.sp] = self.register[operand_a]
+        
+        self.inc_size = 2      
+
+    def handle_pop(self, operand_a, operand_b):
+    
+         # Pop the value at the top of the stack into the register
+        self.register[operand_a] = self.ram[self.sp]
+        # Increment the sp
+        self.sp += 1
+
+        self.inc_size = 2       
+
+              
+ 
 
     def load(self, program):
         """Load a program into memory."""
@@ -114,33 +164,53 @@ class CPU:
 
     def run(self):
         running = True
+        IR = self.ram[self.pc]
+        operand_a = self.ram[self.pc + 1]
+        operand_b = self.ram[self.pc + 2]
 
         while running:
-            cmd = self.ram[self.pc]
+            IR = self.ram[self.pc]
+            operand_a = self.ram[self.pc + 1]
+            operand_b = self.ram[self.pc + 2]
+            if IR in self.branchtable:
+                self.branchtable[IR](operand_a, operand_b)
+                self.pc += self.inc_size 
+            else:
+                print("Invalid instruction")
+                running = False   
 
-            if cmd == LDI:
-                # read the values at the next two positions
-                operand_a = self.ram[self.pc + 1]
-                operand_b = self.ram[self.pc + 2]
-                self.register[operand_a] = operand_b
-                # bypass the three positions that have just been used to move to the next
-                self.pc += 3
+        # self.pc += self.inc_size         
 
-            elif cmd == PRN:
-                register_index = self.ram[self.pc + 1]
-                value = self.register[register_index]
-                print(value)
-                self.pc += 2
 
-            elif cmd == MUL:
-                operand_a = self.ram[self.pc + 1]
-                operand_b = self.ram[self.pc + 2]
-                self.alu("MUL", operand_a, operand_b)
-                self.pc += 3    
+        #     if cmd == LDI:
+        #         # read the values at the next two positions
+        #         operand_a = self.ram[self.pc + 1]
+        #         operand_b = self.ram[self.pc + 2]
+        #         self.register[operand_a] = operand_b
+        #         # bypass the three positions that have just been used to move to the next
+        #         self.pc += 3
 
-              
-            elif cmd == HLT:
-                running = False    
+        #     elif cmd == PRN:
+        #         register_index = self.ram[self.pc + 1]
+        #         value = self.register[register_index]
+        #         print(value)
+        #         self.pc += 2
+
+        #     elif cmd == MUL:
+        #         operand_a = self.ram[self.pc + 1]
+        #         operand_b = self.ram[self.pc + 2]
+        #         self.alu("MUL", operand_a, operand_b)
+        #         self.pc += 3 
+
+        #     elif cmd == PUSH:
+     
+        #         reg = ram[pc + 1]
+        #         val = register[reg]    
+        #         register[sp] -= 1
+        #         ram[register[sp]] = val
+        
+        # inc_size = 2
+ 
                          
 
 
