@@ -51,6 +51,7 @@ class CPU:
         # for instruction in program:
         #     self.ram[address] = instruction
         #     address += 1
+
         if len(sys.argv) != 2:
             print("usage: ls8.py filename")
             sys.exit(1)
@@ -82,7 +83,8 @@ class CPU:
 
         if op == "ADD":
             self.reg[reg_a] += self.reg[reg_b]
-        #elif op == "SUB": etc
+        if op == "MUL":
+           self.reg[reg_a] *= self.reg[reg_b]
         else:
             raise Exception("Unsupported ALU operation")
 
