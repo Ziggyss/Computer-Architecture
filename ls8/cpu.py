@@ -8,8 +8,24 @@ HLT = 0b00000001
 MUL = 0b10100010
 PUSH = 0b01000101
 POP = 0b01000110
+# CALL = 0b01010000
+# RET = 0b00010001
+CMP = 0b10100111
+JMP = 0b01010100
+JEQ = 0b01010101
+JNE = 0b01010110
 
+# JMP  01010100 00000rrr
+# JEQ  01010101 00000rrr
+# JNE  01010110 00000rrr
+# JGT  01010111 00000rrr
+# JLT  01011000 00000rrr
+# JLE  01011001 00000rrr
+# JGE  01011010 00000rrr
 
+less_flag = 0b00000100
+greater_flag = 0b00000010
+equal_flag = 0b00000001
 
 class CPU:
     """Main CPU class."""
@@ -22,17 +38,26 @@ class CPU:
         self.sp = 0xF4
         self.inc_size = 0
         self.branchtable = {}
+        self.flag = 0 
         self.branchtable[LDI] = self.handle_ldi
         self.branchtable[PRN] = self.handle_prn
         self.branchtable[MUL] = self.handle_mul
         self.branchtable[HLT] = self.handle_hlt
         self.branchtable[PUSH] = self.handle_push
         self.branchtable[POP] = self.handle_pop
+        # self.branchtable[CALL] = self.handle_call
+        # self.branchtable[RET] = self.handle_ret
+        self.branchtable[CMP] = self.handle_cmp
+        self.branchtable[JMP] = self.handle_jmp
+        self.branchtable[JEQ] = self.handle_jeq
+        self.branchtable[JNE] = self.handle_jne
+
+
         
 
     def ram_read(self, MAR):
-            # return the value at the memory address 
-            return self.ram[MAR]
+        # return the value at the memory address 
+        return self.ram[MAR]
 
     # MAR is the Memory Address Register (the address)
     # MDR is the Memory Data Register (the value)   
@@ -57,32 +82,42 @@ class CPU:
     def handle_hlt(self, operand_a, operand_b):
         sys.exit()  
 
+    def handle_cmp(self, operand_a, operand_b):
+        self.alu('CMP', operand_a, operand_b)
+        self.inc_size = 3 
+
+    def handle_jmp(self, operand_a, operand_b):
+        self.pc = self.register[operand_a]      
+
+    def handle_jne(self, operand_a, operand_b):
+        if self.flag == 0b00000100 or self.flag == 0b00000010:
+            self.pc = self.register[operand_a]
+        else:
+            self.inc_size = 2
+
+    def handle_jeq(self, operand_a, operand_b):
+        if self.flag == 0b00000001:
+            self.pc = self.register[operand_a]
+        else:
+            self.inc_size = 2 
+
 
     def handle_push(self, operand_a, operand_b):
-        
         #Decrement the sp
         self.sp -= 1
-
         # Push the value in the register to the address pointed to by sp
         self.ram[self.sp] = self.register[operand_a]
-        
         self.inc_size = 2      
 
     def handle_pop(self, operand_a, operand_b):
-    
          # Pop the value at the top of the stack into the register
         self.register[operand_a] = self.ram[self.sp]
         # Increment the sp
         self.sp += 1
-
         self.inc_size = 2       
-
-              
- 
 
     def load(self, program):
         """Load a program into memory."""
-
         address = 0
 
         # For now, we've just hardcoded a program:
@@ -96,8 +131,6 @@ class CPU:
         #     0b00000000,
         #     0b00000001, # HLT
         # ]
-
-        # program = sys.argv[1]
 
         # for instruction in program:
         #     self.ram[address] = instruction
@@ -138,7 +171,14 @@ class CPU:
         if op == "ADD":
             self.register[reg_a] += self.register[reg_b]
         if op == "MUL":
-           self.register[reg_a] *= self.register[reg_b]
+            self.register[reg_a] *= self.register[reg_b]
+        if op == "CMP":
+            if self.register[reg_a] > self.register[reg_b]:
+                self.flag = greater_flag
+            elif self.register[reg_a] < self.register[reg_b]:
+                self.flag = less_flag
+            elif self.register[reg_a] == self.register[reg_b]:
+                self.flag = equal_flag              
         else:
             raise Exception("Unsupported ALU operation")
 
@@ -215,9 +255,4 @@ class CPU:
        
 
    
-# cpu = CPU()
-# cpu.load(program)
-
-# cpu.run()
-
        
