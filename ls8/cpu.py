@@ -27,6 +27,7 @@ less_flag = 0b00000100
 greater_flag = 0b00000010
 equal_flag = 0b00000001
 
+
 class CPU:
     """Main CPU class."""
 
@@ -87,17 +88,20 @@ class CPU:
         self.inc_size = 3 
 
     def handle_jmp(self, operand_a, operand_b):
-        self.pc = self.register[operand_a]      
+        self.pc = self.register[operand_a] 
+        self.inc_size = 0     
 
     def handle_jne(self, operand_a, operand_b):
         if self.flag == 0b00000100 or self.flag == 0b00000010:
             self.pc = self.register[operand_a]
+            self.inc_size = 0
         else:
             self.inc_size = 2
 
     def handle_jeq(self, operand_a, operand_b):
         if self.flag == 0b00000001:
             self.pc = self.register[operand_a]
+            self.inc_size = 0
         else:
             self.inc_size = 2 
 
@@ -132,37 +136,37 @@ class CPU:
         #     0b00000001, # HLT
         # ]
 
-        # for instruction in program:
-        #     self.ram[address] = instruction
-        #     address += 1
+        for instruction in program:
+            self.ram[address] = instruction
+            address += 1
 
-        if len(sys.argv) != 2:
-            print("usage: ls8.py filename")
-            sys.exit(1)
-        try:
-            with open(sys.argv[1]) as f:
-                for line in f:
-                    # split line before and after comment symbol
-                    comment_split = line.split("#")
+        # if len(sys.argv) != 2:
+        #     print("usage: ls8.py filename")
+        #     sys.exit(1)
+        # try:
+        #     with open(sys.argv[1]) as f:
+        #         for line in f:
+        #             # split line before and after comment symbol
+        #             comment_split = line.split("#")
 
-                    # extract our number
-                    num = comment_split[0].strip() # trim whitespace
+        #             # extract our number
+        #             num = comment_split[0].strip() # trim whitespace
 
-                    if num == '':
-                        continue # ignore blank lines
+        #             if num == '':
+        #                 continue # ignore blank lines
 
-                    # convert our binary string to a number
-                    x = int(num, 2)
+        #             # convert our binary string to a number
+        #             x = int(num, 2)
 
-                    # print the x in bin and dec
-                    # print(f"{x:08b}: {x:d}")
+        #             # print the x in bin and dec
+        #             # print(f"{x:08b}: {x:d}")
 
-                    self.ram_write(x, address)
-                    address += 1
+        #             self.ram_write(x, address)
+        #             address += 1
 
-        except FileNotFoundError:
-            print(f"{sys.argv[0]}: {sys.argv[1]} not found")
-            sys.exit(2)    
+        # except FileNotFoundError:
+        #     print(f"{sys.argv[0]}: {sys.argv[1]} not found")
+        #     sys.exit(2)    
 
 
     def alu(self, op, reg_a, reg_b):
@@ -170,9 +174,9 @@ class CPU:
 
         if op == "ADD":
             self.register[reg_a] += self.register[reg_b]
-        if op == "MUL":
+        elif op == "MUL":
             self.register[reg_a] *= self.register[reg_b]
-        if op == "CMP":
+        elif op == "CMP":
             if self.register[reg_a] > self.register[reg_b]:
                 self.flag = greater_flag
             elif self.register[reg_a] < self.register[reg_b]:
