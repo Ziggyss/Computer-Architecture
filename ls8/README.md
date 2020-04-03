@@ -60,8 +60,12 @@ but you'll have to implement those three above instructions first!
 ## Step 0: IMPORTANT: inventory what is here!
 
 * Make a list of files here.
+ls8.py - runs the computer
+cpu.py - contains the CPU class with its methods
+examples - contains example processes that the cpu can run
 * Write a short 3-10-word description of what each file does.
 * Note what has been implemented, and what hasn't.
+We currently have the ability to add in the ALU, and to print the CPU state using the trace method.
 * Read this whole file.
 * Skim the spec.
 
